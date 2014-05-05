@@ -1,0 +1,126 @@
+## p 47
+library(Quandl)
+Quandl.auth("yourauthenticationtoken")
+G <- Quandl('GOOG/NASDAQ_GOOG', start_date = '2009-06-01', end_date = '2013-06-01')
+
+str(G)
+
+G <- G$Close
+
+SP500 <- Quandl('YAHOO/INDEX_GSPC', start_date = '2009-06-01', end_date = '2013-06-01')
+
+SP500 <- SP500$'Adjusted Close'
+
+LIBOR <- Quandl('FED/RILSPDEPM01_N_B', start_date = '2009-06-01', end_date = '2013-06-01')
+
+LIBOR <- LIBOR$Value
+
+## p 48
+sapply(list(G, SP500, LIBOR), length)
+
+G <- Quandl('GOOG/NASDAQ_GOOG', start_date = '2009-06-01', end_date = '2013-06-01')
+SP500 <- Quandl('YAHOO/INDEX_GSPC', start_date = '2009-06-01', end_date = '2013-06-01')
+LIBOR <- Quandl('FED/RILSPDEPM01_N_B', start_date = '2009-06-01', end_date = '2013-06-01')
+
+cdates <- Reduce(intersect, list(G$Date, SP500$Date,LIBOR$Date))
+
+G <- G[G$Date %in% cdates, 'Close']
+SP500 <- SP500[SP500$Date %in% cdates, 'Adjusted Close']
+LIBOR <- LIBOR[LIBOR$Date %in% cdates, 'Value']
+
+logreturn <- function(x) log(tail(x, -1) / head(x, -1))
+
+## p 49
+rft <- log(1 + head(LIBOR, -1)/36000 * diff(cdates))
+str(rft)
+
+cov(logreturn(G) - rft, logreturn(SP500) - rft) / var(logreturn(SP500) - rft)
+
+riskpremium <- function(x) logreturn(x) - rft
+cov(riskpremium(G), riskpremium(SP500)) / var(riskpremium(SP500))
+
+## p 50
+(fit <- lm(riskpremium(G) ~ riskpremium(SP500)))
+
+plot(riskpremium(SP500), riskpremium(G))
+abline(fit, col = 'red')
+
+## p 51
+fit <- lm(riskpremium(G) ~ -1 + riskpremium(SP500))
+summary(fit)
+
+## p 52
+riskpremium(SP500)
+
+summary(lm(riskpremium(G) ~ riskpremium(SP500)))
+
+riskpremium(SP500)
+
+## p 53
+par(mfrow = c(2, 2))
+plot(fit)
+
+## p 54
+symbols <- c("A", "AA", "AAPL", "ABC", "ABT", "ACE", "ACN", "ACT", "ADBE", "ADI", "ADM", "ADP", "ADSK", "AEE", "AEP", "AES","AET", "AFL", "AGN", "AIG", "AIV", "AIZ", "AKAM", "ALL", "ALTR", "ALXN", "AMAT", "AMD", "AMGN", "AMP", "AMT", "AMZN", "AN", "ANF", "AON", "APA", "APC", "APD", "APH", "APOL", "ARG", "ATI", "AVB", "AVP", "AVY", "AXP", "AZO", "BA", "BAC", "BAX", "BBBY", "BBT", "BBY", "BCR", "BDX", "BEAM", "BEN", "BF.B", "BHI", "BIIB", "BK", "BLK", "BLL", "BMC", "BMS", "BMY", "BRCM", "BRK.B", "BSX", "BTU", "BXP", "C", "CA", "CAG", "CAH", "CAM", "CAT", "CB", "CBG", "CBS", "CCE", "CCI", "CCL", "CELG", "CERN", "CF", "CHK", "CHRW", "CI", "CINF", "CL", "CLF", "CLX", "CMA", "CMCSA", "CME")
+
+library(tseries)
+res <- lapply(symbols, function(symbol) get.hist.quote(symbol, quote = "AdjClose", quiet = TRUE, start = as.Date('2003-01-01'), end = as.Date('2007-01-01')))
+
+## p 55
+LIBOR <- Quandl('FED/RILSPDEPM01_N_B', start_date = '2003-01-01', end_date = '2007-01-01')
+SP500 <- Quandl('YAHOO/INDEX_GSPC', start_date = '2003-01-01', end_date = '2007-01-01')
+cdates <- intersect(LIBOR$Date, SP500$Date)
+
+d <- data.frame(date = as.Date(cdates, origin = '1970-01-01'))
+str(d)
+
+d$day <- format(d$date, format = '%d')
+d$my <- format(d$date, format = '%Y-%m')
+
+(fds <- with(d, tapply(day, my, min)))
+
+## p 56
+(fds <- as.Date(paste(row.names(fds), fds, sep = '-')))
+
+res <- lapply(res, function(x) x[which(zoo::index(x) %in% fds)])
+
+res <- do.call(merge, res)
+str(res)
+
+res <- as.data.frame(res)
+names(res) <- symbols
+
+## p 57
+LIBOR <- LIBOR[LIBOR$Date %in% fds, 'Value']
+rft <- log(1 + head(LIBOR, -1)/36000 * as.numeric(diff(fds)))
+res <- apply(res, 2, riskpremium)
+
+SP500 <- SP500[SP500$Date %in% fds, 'Adjusted Close']
+
+res <- apply(res, 2, riskpremium)
+res <- as.data.frame(res)
+r <- t(sapply(symbols, function(symbol)
+              c(beta = lm(res[, symbol] ~ riskpremium(SP500))$coefficients[[2]],
+                mean = mean(res[, symbol]))
+              ))
+r <- as.data.frame(r)
+
+## p 58
+plot(r$beta, r$mean)
+abline(lm(r$mean ~ r$beta), col = 'red')
+summary(lm(r$mean ~ r$beta))
+
+## p 59
+r <- t(sapply(symbols, function(symbol) {
+    stock <- res[, symbol]
+    beta <- lm(stock ~ riskpremium(SP500))$coefficients[[2]]
+    c(
+        beta = beta,
+        mean = mean(stock, na.rm = TRUE),
+        risk = var(stock, na.rm = TRUE) - beta^2 * var(SP500))
+}))
+
+## p 60
+r <- as.data.frame(r)
+
+summary(lm(r$mean ~ r$beta + r$risk))

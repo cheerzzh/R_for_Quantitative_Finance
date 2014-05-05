@@ -1,0 +1,11 @@
+## p 2
+install.packages('zoo')
+library(zoo)
+
+## p 3
+logreturn <- function(x) {
+    log(tail(x, -1) / head(x, -1))
+}
+logreturn <- function(x) {
+    log(tail(x, -1) / head(x, -1))
+}

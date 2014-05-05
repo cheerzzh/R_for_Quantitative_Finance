@@ -1,0 +1,1 @@
+After extracting the sources, the authors have separated those by chapters and with page numbers, so that the reader could easily find the relevant code in the archive while reading the book. They have also placed an empty line between the source code lines if the book has some normal text between the code chunks.

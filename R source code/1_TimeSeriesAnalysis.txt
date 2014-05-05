@@ -1,0 +1,133 @@
+## p 8
+install.packages("zoo")
+library("zoo")
+
+aapl<-read.zoo("aapl.csv", sep=",", header = TRUE, format = "%Y-%m-%d")
+
+plot(aapl, main = "APPLE Closing Prices on NASDAQ", ylab = "Price (USD)", xlab = "Date")
+
+head(aapl)
+
+tail(aapl)
+
+## p 9
+aapl[which.max(aapl)]
+
+ret_simple <- diff(aapl) / lag(aapl, k = -1) * 100
+ret_cont <- diff(log(aapl)) * 100
+summary(coredata(ret_simple))
+ret_simple[which.min(ret_simple)]
+
+hist(ret_simple, breaks=100, main = "Histogram of Simple Returns", xlab="%")
+
+aapl_2013 <- window(aapl, start = '2013-01-01', end = '2013-12-31')
+aapl_2013[which.max(aapl_2013)]
+
+## p 10
+quantile(ret_simple, probs = 0.01)
+
+## p 11
+install.packages("forecast")
+library("forecast")
+
+hp <- read.zoo("UKHP.csv", sep = ",", header = TRUE, format = "%Y-%m", FUN = as.yearmon)
+
+frequency(hp)
+
+hp_ret <- diff(hp) / lag(hp, k = -1) * 100
+
+mod <- auto.arima(hp_ret, stationary = TRUE, seasonal = FALSE, ic="aic")
+
+## p 12
+mod
+confint(mod)
+tsdiag(mod)
+
+## p 13
+plot(mod$x, lty = 1, main = "UK house prices: raw data vs. fitted values", ylab = "Return in percent", xlab = "Date")
+lines(fitted(mod), lty = 2,lwd = 2, col = "red")
+
+## p 14
+accuracy(mod)
+
+predict(mod, n.ahead=3)
+
+plot(forecast(mod))
+
+## p 15
+library("zoo")
+install.packages("urca")
+library("urca")
+
+prices <- read.zoo("JetFuelHedging.csv", sep = ",", FUN = as.yearmon, format = "%Y-%m", header = TRUE)
+
+simple_mod <- lm(diff(prices$JetFuel) ~ diff(prices$HeatingOil)+0)
+summary(simple_mod)
+
+## p 16
+plot(prices$JetFuel, main = "Jet Fuel and Heating Oil Prices", xlab = "Date", ylab = "USD")
+lines(prices$HeatingOil, col = "red")
+
+jf_adf <- ur.df(prices$JetFuel, type = "drift")
+summary(jf_adf)
+
+## p 17
+ho_adf <- ur.df(prices$HeatingOil, type = "drift")
+summary(ho_adf)
+
+mod_static <- summary(lm(prices$JetFuel ~ prices$HeatingOil))
+error <- residuals(mod_static)
+error_cadf <- ur.df(error, type = "none")
+summary(error_cadf)
+
+## p 18
+djf <- diff(prices$JetFuel)
+dho <- diff(prices$HeatingOil)
+error_lag <- lag(error, k = -1)
+mod_ecm <- lm(djf ~ dho + error_lag)
+summary(mod_ecm)
+
+## p 19
+library("zoo")
+intc <- read.zoo("intc.csv", header = TRUE, sep = ",", format = "%Y-%m", FUN = as.yearmon
+
+plot(intc, main = "Monthly returns of Intel Corporation", xlab = "Date", ylab = "Return in percent")
+
+## p 20
+Box.test(coredata(intc^2), type = "Ljung-Box", lag = 12)
+
+install.packages("FinTS")
+library("FinTS")
+ArchTest(coredata(intc))
+
+## p 21
+install.packages("rugarch")
+
+library("rugarch")
+
+intc_garch11_spec <- ugarchspec(variance.model = list(garchOrder = c(1, 1)), mean.model = list(armaOrder = c(0, 0)))
+
+intc_garch11_fit <- ugarchfit(spec = intc_garch11_spec, data = intc)
+
+## p 22
+intc_garch11_roll <- ugarchroll(intc_garch11_spec, intc, n.start = 120, refit.every = 1, refit.window = "moving", solver = "hybrid", calculate.VaR = TRUE, VaR.alpha = 0.01, keep.coef = TRUE)
+
+report(intc_garch11_roll, type = "VaR", VaR.alpha = 0.01, conf.level = 0.99)
+
+## p 23
+intc_VaR <- zoo(intc_garch11_roll@forecast$VaR[, 1])
+
+index(intc_VaR) <- as.yearmon(rownames(intc_garch11_roll@forecast$VaR))
+
+intc_actual <- zoo(intc_garch11_roll@forecast$VaR[, 2])
+index(intc_actual) <-
+as.yearmon(rownames(intc_garch11_roll@forecast$VaR))
+
+plot(intc_actual, type = "b", main = "99% 1 Month VaR Backtesting", xlab = "Date", ylab = "Return/VaR in percent")
+lines(intc_VaR, col = "red")
+legend("topright", inset=.05, c("Intel return","VaR"), col =
+c("black","red"), lty = c(1,1))
+
+## p 24
+intc_garch11_fcst <- ugarchforecast(intc_garch11_fit, n.ahead = 12)
+intc_garch11_fcst

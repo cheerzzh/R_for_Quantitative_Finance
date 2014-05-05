@@ -1,0 +1,46 @@
+## p 115
+install.packages("evir")
+library(evir)
+
+data(danish)
+
+summary(danish)
+
+hist(danish, breaks = 200, xlim = c(0,20))
+
+## p 116
+sum(danish>20) / length(danish)
+
+sum(danish[danish>20]) / sum(danish)
+
+## p 117
+emplot(danish)
+emplot(danish, alog = "xy")
+
+## p 118
+qplot(danish, trim = 100)
+
+## p 119
+meplot(danish, omit = 4)
+
+## p 120
+gpdfit <- gpd(danish, threshold = 10)
+
+gpdfit$converged
+
+gpdfit$par.ests
+
+gpdfit$par.ses
+
+## p 121
+tp <- tailplot(gpdfit)
+gpd.q(tp, pp = 0.999, ci.p = 0.95)
+
+## p 122
+quantile(danish, probs = 0.999, type = 1)
+
+## p 123
+tp <- tailplot(gpdfit)
+gpd.q(tp, pp = 0.99)
+
+gpd.sfall(tp, 0.99)

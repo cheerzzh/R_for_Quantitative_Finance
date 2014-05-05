@@ -1,0 +1,100 @@
+## p 32
+minvariance <- function(assets, mu = 0.005) {
+	return <- log(tail(assets, -1) / head(assets, -1))
+	Q <- rbind(cov(return), rep(1, ncol(assets)), colMeans(return))
+	Q <- cbind(Q, rbind(t(tail(Q, 2)), matrix(0, 2, 2)))
+	b <- c(rep(0, ncol(assets)), 1, mu)
+	solve(Q, b)
+}
+
+library(Quandl)
+IT <- Quandl('USER_1KR/1KT', start_date = '2008-01-01', end_date = '2012-12-31')
+
+str(IT)
+
+## p 33
+assets <- IT[, -1]
+return <- log(tail(assets, -1) / head(assets, -1))
+
+head(return)
+
+## p 34
+Q <- rbind(cov(return), rep(1, ncol(assets)), colMeans(return))
+
+round(Q, 5)
+
+Q <- cbind(Q, rbind(t(tail(Q, 2)), matrix(0, 2, 2)))
+round(Q, 5)
+
+## p 35
+mu <- 0.005
+b <- c(rep(0, ncol(assets)), 1, mu)
+b
+
+solve(Q, b)
+
+minvariance(IT[, -1])
+
+frontier <- function(assets) {
+    return <- log(tail(assets, -1) / head(assets, -1))
+    Q <- cov(return)
+    n <- ncol(assets)
+    r <- colMeans(return)
+    Q1 <- rbind(Q, rep(1, n), r)
+    Q1 <- cbind(Q1, rbind(t(tail(Q1, 2)), matrix(0, 2, 2)))
+    rbase <- seq(min(r), max(r), length = 100)
+    s <- sapply(rbase, function(x) {
+        y <- head(solve(Q1, c(rep(0, n), 1, x)), n)
+        y %*% Q %*% y
+    })
+    plot(s, rbase, xlab = 'Return', ylab = 'Variance')
+}
+
+## p 37
+library(timeSeries)
+IT <- timeSeries(IT[, 2:6], IT[, 1])
+
+log(lag(IT) / IT)
+
+IT_return <- returns(IT)
+
+chart.CumReturns(IT_return, legend.loc = 'topleft', main = '')
+
+## p 38
+library(fPortfolio)
+plot(portfolioFrontier(IT_return))
+
+Spec = portfolioSpec()
+setSolver(Spec) = "solveRshortExact"
+Frontier <- portfolioFrontier(as.timeSeries(IT_return), Spec, > constraints = "Short")
+frontierPlot(Frontier, col = rep('orange', 2), pch = 19)
+monteCarloPoints(Frontier, mcSteps = 1000, cex = 0.25, pch = 19)
+grid()
+
+## p 40
+n <- 6; mu <- 0.005
+Q <- cbind(cov(return), rep(0, n - 1))
+Q <- rbind(Q, rep(0, n))
+
+r <- c(colMeans(return), rf)
+
+Q <- rbind(Q, rep(1, n), r)
+Q <- cbind(Q, rbind(t(tail(Q, 2)), matrix(0, 2, 2)))
+b <- c(rep(0, n), 1, mu)
+
+round(Q, 6)
+
+b
+
+w <- solve(Q, b)
+w <- head(w, -3)
+w / sum(w)
+
+## p 41
+Spec <- portfolioSpec()
+setSolver(Spec) <- "solveRshortExact"
+setTargetReturn(Spec) <- mean(colMeans(IT_return))
+efficientPortfolio(IT_return, Spec, 'Short')
+minvariancePortfolio(IT_return, Spec, 'Short')
+minriskPortfolio(IT_return, Spec)
+maxreturnPortfolio(IT_return, Spec)

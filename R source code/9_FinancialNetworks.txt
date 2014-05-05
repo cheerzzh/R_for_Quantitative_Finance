@@ -1,0 +1,80 @@
+## p 127
+set.seed(7)
+
+e <- erdos.renyi.game(100, 0.1)
+plot(e)
+
+graph.density(e)
+
+transitivity(e)
+
+average.path.length(e)
+
+## p 128
+set.seed(592)
+w <- watts.strogatz.game(1, 100, 5, 0.05)
+plot(w)
+
+## p 129
+graph.density(w)
+
+transitivity(w)
+
+average.path.length(w)
+
+we <- get.edgelist(w)> head(we, 5)
+
+## p 130
+data <- read.csv2(‘networktable.csv’)
+
+str(data)
+
+## p 131
+size <- read.csv2(‘vertices.csv’)
+
+bignetwork <- graph.data.frame(data, vertices = size)
+
+is.connected(bignetwork)
+
+table(is.multiple(bignetwork))
+
+str(is.loop(bignetwork))
+
+snetwork <- simplify(bignetwork, edge.attr.comb = “sum”)
+
+plot(snetwork, edge.arrow.size = 0.4)
+
+## p 132
+communities
+
+## p 133
+monthlynetwork <- subset(data, (Year == 2008) & (Month == 9))
+
+mAmount <- with(data, aggregate(Amount, by = list(Month = Month, Year = Year), FUN = sum))
+
+plot(ts(mAmount$x, start = c(2007, 1), frequency = 12), ylab = ‘Amount’)
+
+## p 134
+ds <- sapply(2007:2010, function(year) {
+    sapply(1:12, function(month) {
+        mdata <- subset(data, (Year == year) & (Month == month))
+        graph.density(graph.data.frame(mdata))
+    })
+})
+plot(ts(as.vector(ds), start = c(2007, 1), frequency=12))
+abline(v = 2008 + 259/366, col = ‘red’)
+
+## p 136
+g <- graph.data.frame(data)
+
+degree <- degree(g, normalized = TRUE)
+between <- betweenness(g, normalized = TRUE)
+closeness <- closeness(g, normalized = TRUE)
+eigenv <- evcent(g, directed = TRUE)$vector
+
+norm <- function(x) x / mean(x)
+
+## p 137
+index <- (norm(degree) + norm(between) + norm(closeness) + norm(eigenv)) / 4
+index
+hist(index)

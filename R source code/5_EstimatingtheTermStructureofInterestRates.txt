@@ -1,0 +1,32 @@
+## p 77
+data(govbonds)
+str(govbonds[['GERMANY']])
+
+## p 78
+prepro <- prepro_bond('GERMANY', govbonds)
+
+m <- prepro$m[[1]]
+
+n <- ncol(m)
+s <- round(sqrt(n))
+
+c(floor(min(y[, 1])), max(m[, ncol(m)]))
+
+## p 79
+i <- 2:(s-2)
+h <- trunc(((i - 1) * n) / (s - 2))
+theta <- ((i - 1) * n) / (s - 2) - h
+
+apply(as.matrix(m[, h]), 2, max) +
+    theta * (apply(as.matrix(m[, h + 1]), 2, max) –
+             apply(as.matrix(m[, h]), 2, max))
+
+c(floor(min(y[, 1])), apply(as.matrix(m[, h]), 2, max) + theta * (apply(as.matrix(m[, h + 1]), 2, max) - apply(as.matrix(m[, h]), 2, max)), max(m[, ncol(m)]))
+
+x <- estim_cs(govbonds, 'GERMANY')
+x$knotpoints[[1]]
+
+## p 82
+par(mfrow = c(2,1))
+plot(x$discount, multiple = TRUE)
+plot(x$forward, multiple = TRUE)
