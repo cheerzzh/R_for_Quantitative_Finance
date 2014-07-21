@@ -100,3 +100,14 @@ data <- cbind(indi,t)
 data <- data.frame(date=index(data), coredata(data))
 colnames(data)[2] <- "indicator" 
 write.csv(data, file = "KRW205_currency_outlier.csv",row.names=TRUE)
+
+
+# compute return
+ret <-  (t/lag(t,1) - 1)[-1,]
+potential_day <- ret[index(indi[indi==1]),]
+head(potential_day) # take a quick view
+
+# coredata(potential_day[1,])
+plot(c(coredata(potential_day[1,])))
+
+

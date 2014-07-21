@@ -9,6 +9,7 @@ dates <- data$Date
 rates <- data[,-1]
 dates <- as.POSIXct(dates,format ="%m/%d/%Y")
 t <- as.xts(rates, order.by = dates)
+# t <- diff(t)[-1,]
   # scale 
 rate_name <- names(t)
 span <- 0.1
