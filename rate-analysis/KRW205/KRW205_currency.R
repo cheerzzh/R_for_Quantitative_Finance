@@ -107,7 +107,10 @@ ret <-  (t/lag(t,1) - 1)[-1,]
 potential_day <- ret[index(indi[indi==1]),]
 head(potential_day) # take a quick view
 
+
+# plot all graph first
 # coredata(potential_day[1,])
-plot(c(coredata(potential_day[1,])))
+i=1
+plot(c(coredata(potential_day[i,])),xlab = "Tenor",ylab = "scale of change",main = paste("percentage change across tenors in ",index(potential_day[i,])))
 
 
