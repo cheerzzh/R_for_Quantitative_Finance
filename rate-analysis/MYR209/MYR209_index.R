@@ -63,7 +63,7 @@ indi <- rep(0,nrow(t)) # initialize the indicator vector
 
 for (i in 1:ncol(t))
 {
-  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.1,0.8),k=3,range=c(-1,1))
+  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.1,0.9),k=3,range=c(-1,1))
 # if any col in one raw has 1, label this row as 1
 indi <- indi | a$indicator
 }
@@ -98,3 +98,24 @@ data <- cbind(indi,t)
 data <- data.frame(date=index(data), coredata(data))
 colnames(data)[2] <- "indicator" 
 write.csv(data, file = "MYR209_index_outlier.csv",row.names=TRUE)
+
+ret <-  (t/lag(t,1) - 1)[-1,]
+potential_day <- ret[index(indi[indi==1]),]
+head(potential_day) # take a quick view
+
+# plot all graph first
+# coredata(potential_day[1,])
+jpeg(file = " MYR209 index check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
+par(mfrow=c(3,3))
+for(i in 1 : nrow(potential_day))
+{
+  dat <- coredata(potential_day[i,])
+  plot(c(dat),col=ifelse(c(dat)==0, "black", ifelse(c(dat)>0,"blue","red")),
+      pch=16,axes=FALSE,xlab = "Tenor",ylab = "scale of change",main = index(potential_day[i,]))
+  axis(2)
+  axis(1, at=seq_along(c(dat)),labels=names(potential_day), las=2)
+  box()
+  abline(h=0,lty="dashed",col="chartreuse4")
+  legend("topleft", pch = c(15, 15, 15),col = c("blue", "black","red"),legend = c(">0","=0","<0"))
+}
+dev.off()

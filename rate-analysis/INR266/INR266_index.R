@@ -100,3 +100,5 @@ data <- data.frame(date=index(data), coredata(data))
 colnames(data)[2] <- "indicator"
 colnames(data)[3] <- "Overnight"
 write.csv(data, file = "INR266_index_outlier.csv",row.names=TRUE)
+
+# single tenor, no need to compare across tenors

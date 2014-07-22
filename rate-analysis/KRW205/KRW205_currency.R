@@ -110,7 +110,7 @@ head(potential_day) # take a quick view
 
 # plot all graph first
 # coredata(potential_day[1,])
-jpeg(file = " KRW205 check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
+jpeg(file = " KRW205 currency check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
 par(mfrow=c(3,3))
 for(i in 1 : nrow(potential_day))
 {

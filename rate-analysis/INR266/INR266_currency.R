@@ -103,3 +103,25 @@ data <- data.frame(date=index(data), coredata(data))
 colnames(data)[2] <- "indicator"
 write.csv(data, file = "INR266_currency_outlier.csv",row.names=TRUE)
 
+ret <-  (t/lag(t,1) - 1)[-1,]
+potential_day <- ret[index(indi[indi==1]),]
+head(potential_day) # take a quick view
+
+
+# plot all graph first
+# coredata(potential_day[1,])
+jpeg(file = " INR266 currency check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
+par(mfrow=c(3,3))
+for(i in 1 : nrow(potential_day))
+{
+  dat <- coredata(potential_day[i,])
+  plot(c(dat),col=ifelse(c(dat)==0, "black", ifelse(c(dat)>0,"blue","red")),
+      pch=16,axes=FALSE,xlab = "Tenor",ylab = "scale of change",main = index(potential_day[i,]))
+  axis(2)
+  axis(1, at=seq_along(c(dat)),labels=names(potential_day), las=2)
+  box()
+  abline(h=0,lty="dashed",col="chartreuse4")
+  legend("topleft", pch = c(15, 15, 15),col = c("blue", "black","red"),legend = c(">0","=0","<0"))
+}
+dev.off()
+
