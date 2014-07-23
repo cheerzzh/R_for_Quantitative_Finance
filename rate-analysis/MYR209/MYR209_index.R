@@ -99,6 +99,8 @@ data <- data.frame(date=index(data), coredata(data))
 colnames(data)[2] <- "indicator" 
 write.csv(data, file = "MYR209_index_outlier.csv",row.names=TRUE)
 
+
+#================
 ret <-  (t/lag(t,1) - 1)[-1,]
 potential_day <- ret[index(indi[indi==1]),]
 head(potential_day) # take a quick view
@@ -119,3 +121,19 @@ for(i in 1 : nrow(potential_day))
   legend("topleft", pch = c(15, 15, 15),col = c("blue", "black","red"),legend = c(">0","=0","<0"))
 }
 dev.off()
+
+
+
+
+library(rgl)
+
+x = seq(1, nrow(t), len = nrow(t))
+y = seq(1, ncol(t), len = ncol(t))  
+z = t
+nbcol = 100
+color = rev(rainbow(nbcol, start = 0/6, end = 4/6))
+zcol  = cut(z, nbcol)
+
+
+
+persp3d(x , y , z,xlab = "date", ylab = "tenor", zlab = "r", col=color[zcol],ltheta = 120, shade = 0.75, ticktype = "detailed")

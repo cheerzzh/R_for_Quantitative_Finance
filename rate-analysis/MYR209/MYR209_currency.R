@@ -123,8 +123,17 @@ dev.off()
 
 
 library(rgl)
-persp3d(x = seq(1, nrow(t), len = nrow(t)), y = seq(1, ncol(t), len = ncol(t)), t,
-    xlab = "date", ylab = "tenor", zlab = "r", col = "lightblue",ltheta = 120, shade = 0.75, ticktype = "detailed")
+
+x = seq(1, nrow(t), len = nrow(t))
+y = seq(1, ncol(t), len = ncol(t))  
+z = t
+nbcol = 100
+color = rev(rainbow(nbcol, start = 0/6, end = 4/6))
+zcol  = cut(z, nbcol)
+
+
+
+persp3d(x , y , z,xlab = "date", ylab = "tenor", zlab = "r", col=color[zcol],ltheta = 120, shade = 0.75, ticktype = "detailed")
 
 x = seq(1, nrow(t), len = nrow(t))
 y = seq(1, ncol(t), len = ncol(t))  
