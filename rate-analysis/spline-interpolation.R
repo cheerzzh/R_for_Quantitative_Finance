@@ -13,12 +13,34 @@ d <- data.frame(i=rep(1:nrow(t),ncol(t)),
 dateIndex <- index(t)
 tenorName <- names(t) 
 
+# noew for CNY
+targetList <- read.csv("outlier-case.csv",stringsAsFactors = FALSE)
 # a data frame to store the possible outlier tenors on some days
 # can read from a csv containing the dates and name of tneors
 targetList <- data.frame(Date="2010-03-08",Tenor = "X6M")
 targetList <- data.frame(lapply(targetList, as.character), stringsAsFactors=FALSE)
 # for testing purpose
 targetList <- rbind(targetList,c("2010-03-08","X9M"))
+targetList <- rbind(targetList,c("2010-03-09","X6M"))
+targetList <- rbind(targetList,c("2010-03-09","X9M"))
+targetList <- rbind(targetList,c("2010-03-10","X6M"))
+targetList <- rbind(targetList,c("2010-03-10","X9M"))
+targetList <- rbind(targetList,c("2010-03-11","X6M"))
+targetList <- rbind(targetList,c("2010-03-11","X9M"))
+targetList <- rbind(targetList,c("2010-03-12","X6M"))
+targetList <- rbind(targetList,c("2010-03-12","X9M"))
+
+targetList <- rbind(targetList,c("2010-03-15","X6M"))
+targetList <- rbind(targetList,c("2010-03-15","X9M"))
+argetList <- rbind(targetList,c("2010-03-16","X6M"))
+targetList <- rbind(targetList,c("2010-03-16","X9M"))
+targetList <- rbind(targetList,c("2010-03-17","X6M"))
+targetList <- rbind(targetList,c("2010-03-17","X9M"))
+targetList <- rbind(targetList,c("2010-03-18","X6M"))
+targetList <- rbind(targetList,c("2010-03-18","X9M"))
+targetList <- rbind(targetList,c("2010-03-19","X6M"))
+targetList <- rbind(targetList,c("2010-03-19","X9M"))
+
 targetList <- rbind(targetList,c("2010-03-22","X6M"))
 targetList <- rbind(targetList,c("2010-03-22","X9M"))
 
@@ -28,6 +50,7 @@ index1_list <- c()
 index2_list <- c()
 remove <- rep(0,nrow(d))
 original_value <- c()
+t_new <- t # to replace interpolated value 
 
 for (i in 1:nrow(targetList))
 {
@@ -57,7 +80,30 @@ estimation_result[,"Original value"] = original_value
 estimation_result[,"Interpolated value"] = interpolated_value
 estimation_result
 
+# replace interpolated value
+for(i in 1:nrow(targetList))
+{
+	date <- index1_list[i]
+	tenor <- index2_list[i]
+	t_new[date,tenor] = interpolated_value[i]
+}
 
+
+# =============================
+# for illustration purpose
+# plot the neighbour around the interpolated tenors
+# replace old value with interpolated value 
+
+par(mfrow=c(1,1))
+plot.xts(t['2010-12::2011-4'], screens = factor(1, 1),auto.legend = TRUE, main = "original 2010-03 to 2010-04", xlab="day",ylab="%")
+plot.xts(t_new['2010-12::2011-4'], screens = factor(1, 1),auto.legend = TRUE, main = "interpolated 2010-03-08", xlab="day",ylab="%")
+
+
+# ====================
+
+
+# may write out as a csv file
+# merge into the original curve data set
 
 
 
