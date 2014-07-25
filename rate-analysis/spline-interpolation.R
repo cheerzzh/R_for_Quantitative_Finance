@@ -1,69 +1,65 @@
 
+library(akima)
 
-# y
-x <- 1:nrow(t)
-y <- 1:ncol(t)
-z <- t
-
-rgl.spheres(x,z , y,0.5,color="red")
-aspect3d("iso")
-
-rgl.bbox()
-
-# ===
-ylim <- range(y)
-ylen <- ylim[2] - ylim[1] + 1
-colorlut <- terrain.colors(ylen) # height color lookup table
-col <- colorlut[ y-ylim[1]+1 ] # assign colors to heights for each point
-rgl.open()
-rgl.surface(x, y, z, color=col, back="lines")
-aspect3d("iso")
-
-
-plot3d(x,y,z)
-
-
-
-z[10,3] = NA
-akima.bic <- bicubic.grid(x,y,z,c(1,10),c(1,2),0.1,0.1)
-image(akima.bic)
-contour(akima.bic, add=TRUE)
-
-# should use unsapced data
-# delete the outlier data point
-# 
-
-t[100,2]
-t[446,9]
-
+# prepare a 3-column data frame for using interpolation
 d <- data.frame(i=rep(1:nrow(t),ncol(t)),
                 j=rep(1:ncol(t),each=nrow(t)),
                 rate=as.vector(t))
 
-
-d[d$i == 100 & d$j ==2,3] # to test whether the 
-removeList <- d$i == 100 & d$j ==2
-removeList <- removeList | (d$i==446 & d$j==9)
-temp <- d[-removeList,]
-# subset(d , i==100 & j ==2)
-d[c(100,120,143,456),]
-temp <- d[-c(100,120,143,456),]
-
 # a procedure to convert specific date into 2 index for d
 # 2010-6-9 X9M -> t[i,j] -> d[n,]
 
+# for matching
 dateIndex <- index(t)
-targetDate <- as.POSIXct("2009-06-02")
-index1 <- which(dateIndex == target)
-tenorName <- names(t)
-targetTenor <- "X6M"
-index2 <- which(tenorName == targetTenor)
+tenorName <- names(t) 
 
-t[index1,index2]
+# a data frame to store the possible outlier tenors on some days
+# can read from a csv containing the dates and name of tneors
+targetList <- data.frame(Date="2010-03-08",Tenor = "X6M")
+targetList <- data.frame(lapply(targetList, as.character), stringsAsFactors=FALSE)
+# for testing purpose
+targetList <- rbind(targetList,c("2010-03-08","X9M"))
+targetList <- rbind(targetList,c("2010-03-22","X6M"))
+targetList <- rbind(targetList,c("2010-03-22","X9M"))
 
-# remove the target tennor in a day
+# loop for all rows in target list, convert into index i, j for temp
+# initialize to ensure empty
+index1_list <- c()
+index2_list <- c()
+remove <- rep(0,nrow(d))
+original_value <- c()
 
-li <- with(temp,interp(i, j,rate,xo=100,yo=2))
+for (i in 1:nrow(targetList))
+{
+	targetDate <- as.POSIXct(targetList[i,1])
+	index1 <- which(dateIndex == targetDate)
+	index1_list <- c(index1_list,index1)
+
+	targetTenor <- targetList[i,2]
+	index2 <- which(tenorName == targetTenor)
+	index2_list <- c(index2_list,index2)
+	# t[index1,index2]
+	remove <- remove | (d$i==index1 & d$j == index2)
+	original_value <- c(original_value, coredata(t[index1,index2]))
+
+}
+# # remove the target tennor in target days
+temp <- d[! remove,]
+# original_value <- d[remove,3]
+
+interpolated <- with(temp,interp(i, j,rate,xo=index1_list,yo=index2_list),linear=FALSE)
+#interpolated[interpolated$x == index1 & interpolated$y==index2] 
+# take diagnoal entry
+interpolated_value <- diag(interpolated$z)
+# output the result into a data frame
+estimation_result <- targetList
+estimation_result[,"Original value"] = original_value
+estimation_result[,"Interpolated value"] = interpolated_value
+estimation_result
+
+
+
+
 
 
 
