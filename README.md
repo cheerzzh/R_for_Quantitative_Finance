@@ -1,5 +1,5 @@
-R for Quantitative_Finance
-==========================
+R for Quantitative Finance
+=========================
 R code and data sets from various sources for quantitive finance fields.
 
 Just name a few:  
