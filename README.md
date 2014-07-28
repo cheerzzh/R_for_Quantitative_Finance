@@ -2,7 +2,7 @@ R for Quantitative_Finance
 ==========================
 R code and data sets from various sources for quantitive finance fields.
 
-Just name a few:
+Just name a few:  
 1. book **Introduction to R for Quantitative Finance**  
 2. several blogs, especially **systematic investor**  
 3. R packages for finance and corresponding manuals and tutorials  
