@@ -1,0 +1,32 @@
+library(fBasics)
+library(evir)
+data(siemens)
+SieDates <- as.character(format(as.POSIXct(attr(siemens, "times")),
+                                "%Y-%m-%d"))
+SieRet <- timeSeries(siemens * 100, charvec = SieDates)
+colnames(SieRet) <- "SieRet"
+## Stylised Facts I
+par(mfrow = c(2, 2))
+seriesPlot(SieRet, title = FALSE, main = "Daily Returns of Siemens",
+           col = "blue")
+boxPlot(SieRet, title = FALSE, main = "Box plot of Returns",
+        col = "blue", cex = 0.5, pch = 19)
+acf(SieRet, main = "ACF of Returns", lag.max = 20, ylab = "",
+    xlab = "", col = "blue", ci.col = "red")
+pacf(SieRet, main = "PACF of Returns", lag.max = 20, ylab = "",
+     xlab = "", col = "blue", ci.col = "red")
+## Stylised Facts II
+SieRetAbs <- abs(SieRet)
+SieRet100 <- tail(sort(abs(series(SieRet))), 100)[1]
+idx <- which(series(SieRetAbs) > SieRet100, arr.ind = TRUE)
+SieRetAbs100 <- timeSeries(rep(0, length(SieRet)),
+                           charvec = time(SieRet))
+SieRetAbs100[idx, 1] <- SieRetAbs[idx]
+acf(SieRetAbs, main = "ACF of Absolute Returns", lag.max = 20,
+    ylab = "", xlab = "", col = "blue", ci.col = "red")
+pacf(SieRetAbs, main = "PACF of Absolute Returns", lag.max = 20,
+     ylab = "", xlab = "", col = "blue", ci.col = "red")
+qqnormPlot(SieRet, main = "QQ-Plot of Returns", title = FALSE,
+           col = "blue", cex = 0.5, pch = 19)
+plot(SieRetAbs100, type = "h", main = "Volatility Clustering",
+     ylab = "", xlab = "", col = "blue")
