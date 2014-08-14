@@ -87,3 +87,7 @@ eDate <- as.Date(max(index(ldata)))
 drawLine(ldata,title,sDate,eDate)
 
 
+# 一条均线的交易策略
+# 1. 以股价和20日均线的交叉，进行交易信号的判断。
+# 2. 当股价上穿20日均线则买入(红色)，下穿20日均线卖出(蓝色)。
+
