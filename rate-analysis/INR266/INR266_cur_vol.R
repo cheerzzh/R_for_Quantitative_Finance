@@ -118,11 +118,11 @@ t <-  log(origin/lag(origin,1))[-1,] # compute log return
 # remove sample means - mean scale to 0
 at <- scale(t,center=T,scale=FALSE)
 
-ret <- at[,1]
+ret <- coredata(at[,1])
 names(ret) <- "demeaned log return"
 plot.xts(x=cbind(origin[-1,1],ret), auto.legend = TRUE,main = "INR266 1M")
 
-res <- svsample(ret, priormu = c(-10,1), priorphi = c(20,1.1), priorsigma = 0.1)
+res <- svsample(ret, priormu = c(0,1), priorphi = c(20,1.1), priorsigma = 0.1)
 # assessing the output and displaying the results
 summary(res, showlatent = FALSE)
 
