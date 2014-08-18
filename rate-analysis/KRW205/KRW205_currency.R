@@ -127,3 +127,14 @@ dev.off()
 
 
 
+# plot the window for each potential outlier day
+
+
+
+
+
+
+
+
+
+
