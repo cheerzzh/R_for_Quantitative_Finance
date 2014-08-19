@@ -45,13 +45,13 @@ tsoutliers <- function(x,plot=TRUE,span=0.1,name="",percentile = c(0.2,0.75),k=3
           y=x[,1][index(indi[indi == 1])],cex=0.9,pch=19,
           col="blue")
           #abline(v=index(indi[indi == 1]),col="grey")
-    }
+        }
 
       newlist <- list(score = score, resid = resid,indicator = indicator)
-    plot.xts(x=cbind(x,fitted=loe$fitted,residual=loe$residuals),panel = custom.panel, screens = factor(1, 1), auto.legend = TRUE, main = paste("LOESS plot",rate_name[i],sep=" "))
+      plot.xts(x=cbind(x,fitted=loe$fitted,residual=loe$residuals),panel = custom.panel, screens = factor(1, 1), auto.legend = TRUE, main = paste("LOESS plot",rate_name[i],sep=" "))
 
-        cat("Number of outliers for ",name," is ", sum(indicator),"\n")
-        return(invisible(newlist))
+      cat("Number of outliers for ",name," is ", sum(indicator),"\n")
+      return(invisible(newlist))
     }
     else
         return(list(score,resid,indicator))
@@ -108,10 +108,15 @@ potential_day <- ret[index(indi[indi==1]),]
 head(potential_day) # take a quick view
 
 
+# prepare the date index
+index_whole <- index(t)
+index_candidate <- index(potential_day)
+index_position <- match(index_candidate,index_whole)
+
 # plot all graph first
 # coredata(potential_day[1,])
-jpeg(file = " KRW205 currency check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
-par(mfrow=c(3,3))
+jpeg(file = " KRW205 currency check plot %d.jpeg",quality=100,width = 800, height = 600,units = 'px', pointsize = 12)
+par(mfrow=c(2,2))
 for(i in 1 : nrow(potential_day))
 {
   dat <- coredata(potential_day[i,])
@@ -123,19 +128,40 @@ for(i in 1 : nrow(potential_day))
   abline(h=mean(dat),lty="dashed",col="chartreuse4")
   #text(1,mean(dat),"average rate of change")
   legend("topleft", pch = c(15, 15, 15, 16),col = c("blue", "black","red","green"),legend = c(">0","=0","<0","average rate of change"))
+
+  # plot the window for each potential outlier day
+  # orignal data
+  # need to put legend outside the plot box
+ 
+  custom.panel <- function(index,x,...) {
+  default.panel(index,x,...)
+  abline(v=index(potential_day[i,]),col=rgb(1,0,0,0.6),lwd=1.5,lty="dashed")
+  }
+
+  range <- (index_position[i] -5) : (index_position[i]+5)
+  # for head and tail cases
+  if( index_position[i] < 6)
+  { 
+    range <- 1:10
+  } else if( (nrow(t) - index_position[i]) <6 )
+  {
+    range <- nrow(t-5):nrow(t)
+  } 
+
+
+  if(0){
+  plot.xts(t[range], screens = factor(1, 1), panel = custom.panel, auto.legend = TRUE, main = index(potential_day[i,]))
+  }
+  
+  color <- as.factor(1:ncol(t))
+  ts.plot(t[range], gpars = list( col = color, xlab="Date", main = index(potential_day[i,])) )# don't plot the axes yet
+  #plot(t[range], screen=1)
+  #axis(2) # plot the y axis
+  #axis(1, at=seq_along(range),labels=as.character(index_whole[range]) )
+  #box() # and the box around the plot
 }
 dev.off()
 
 
 
-# plot the window for each potential outlier day
-
-
-
-
-
-
-
-
-
-
+# use gridbase to combine plot
