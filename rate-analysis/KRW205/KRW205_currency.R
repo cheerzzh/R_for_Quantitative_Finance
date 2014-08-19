@@ -64,7 +64,7 @@ indi <- rep(0,nrow(t)) # initialize the indicator vector
 indi.matrix <- matrix(0,nrow = nrow(t),ncol = ncol(t))
 for (i in 1:ncol(t))
 {
-  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.1,0.9),k=3,range=c(-1,1))
+  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.1,0.9),k=2,range=c(-1,1))
 # if any col in one raw has 1, label this row as 1
 indi <- indi | a$indicator
 indi.matrix[,i] <- a$indicator
@@ -142,7 +142,7 @@ for(i in 1 : nrow(potential_day))
   # for head and tail cases
   if( index_position[i] < 6)
   { 
-    range <- 1:10
+    range <- 1:10 
   } else if( (nrow(t) - index_position[i]) <6 )
   {
     range <- nrow(t-5):nrow(t)
