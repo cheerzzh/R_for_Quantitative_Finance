@@ -117,11 +117,12 @@ for(i in 1 : nrow(potential_day))
   dat <- coredata(potential_day[i,])
   plot(c(dat),col=ifelse(c(dat)==0, "black", ifelse(c(dat)>0,"blue","red")),
       pch=16,axes=FALSE,xlab = "Tenor",ylab = "scale of change",main = index(potential_day[i,]))
-  axis(2)
+  axis(2,at = x <- pretty(dat),lab=paste0(x * 100, " %"))
   axis(1, at=seq_along(c(dat)),labels=names(potential_day), las=2)
   box()
-  abline(h=0,lty="dashed",col="chartreuse4")
-  legend("topleft", pch = c(15, 15, 15),col = c("blue", "black","red"),legend = c(">0","=0","<0"))
+  abline(h=mean(dat),lty="dashed",col="chartreuse4")
+  #text(1,mean(dat),"average rate of change")
+  legend("topleft", pch = c(15, 15, 15, 16),col = c("blue", "black","red","green"),legend = c(">0","=0","<0","average rate of change"))
 }
 dev.off()
 
