@@ -64,7 +64,7 @@ indi <- rep(0,nrow(t)) # initialize the indicator vector
 
 for (i in 1:ncol(t))
 {
-  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.15,0.85),k=3,range=c(-1,0.9))
+  a <- tsoutliers(t[,i],name = rate_name[i],span=span, percentile = c(0.1,0.9),k=2,range=c(-1,1))
 # if any col in one raw has 1, label this row as 1
 indi <- indi | a$indicator
 }
@@ -103,19 +103,59 @@ ret <-  (t/lag(t,1) - 1)[-1,]
 potential_day <- ret[index(indi[indi==1]),]
 head(potential_day) # take a quick view
 
+# prepare the date index
+index_whole <- index(t)
+index_candidate <- index(potential_day)
+index_position <- match(index_candidate,index_whole)
+
 # plot all graph first
 # coredata(potential_day[1,])
-jpeg(file = " TWD203 currency check plot %d.jpeg",quality=100,width = 1200, height = 800,units = 'px', pointsize = 12)
-par(mfrow=c(3,3))
+jpeg(file = " TWD203 currency check plot %d.jpeg",quality=100,width = 800, height = 600,units = 'px', pointsize = 12)
+par(mfrow=c(2,2))
 for(i in 1 : nrow(potential_day))
 {
   dat <- coredata(potential_day[i,])
   plot(c(dat),col=ifelse(c(dat)==0, "black", ifelse(c(dat)>0,"blue","red")),
       pch=16,axes=FALSE,xlab = "Tenor",ylab = "scale of change",main = index(potential_day[i,]))
-  axis(2)
+  axis(2,at = x <- pretty(dat),lab=paste0(x * 100, " %"))
   axis(1, at=seq_along(c(dat)),labels=names(potential_day), las=2)
   box()
-  abline(h=0,lty="dashed",col="chartreuse4")
-  legend("topleft", pch = c(15, 15, 15),col = c("blue", "black","red"),legend = c(">0","=0","<0"))
+  abline(h=mean(dat),lty="dashed",col="chartreuse4")
+  #text(1,mean(dat),"average rate of change")
+  legend("topleft", pch = c(15, 15, 15, 16),col = c("blue", "black","red","green"),legend = c(">0","=0","<0","average rate of change"))
+
+  # plot the window for each potential outlier day
+  # orignal data
+  # need to put legend outside the plot box
+ 
+  custom.panel <- function(index,x,...) {
+  default.panel(index,x,...)
+  abline(v=index(potential_day[i,]),col=rgb(1,0,0,0.6),lwd=1.5,lty="dashed")
+  }
+
+  range <- (index_position[i] -5) : (index_position[i]+5)
+  # for head and tail cases
+  if( index_position[i] < 6)
+  { 
+    range <- 1:10 
+  } else if( (nrow(t) - index_position[i]) <6 )
+  {
+    range <- nrow(t-5):nrow(t)
+  } 
+
+
+  if(0){
+  plot.xts(t[range], screens = factor(1, 1), panel = custom.panel, auto.legend = TRUE, main = index(potential_day[i,]))
+  }
+  
+  color <- as.factor(1:ncol(t))
+  ts.plot(t[range], gpars = list( col = color, xlab="Date", main = index(potential_day[i,])) )# don't plot the axes yet
+  #plot(t[range], screen=1)
+  #axis(2) # plot the y axis
+  #axis(1, at=seq_along(range),labels=as.character(index_whole[range]) )
+  #box() # and the box around the plot
 }
 dev.off()
+
+
+
