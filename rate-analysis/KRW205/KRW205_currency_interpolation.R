@@ -80,6 +80,10 @@ for(i in 1: ncol(series)){
 	}
 }
 
+# save csv files
+print(result)
+write.csv(as.data.frame(data_after), file = "KRW205_currency_interpolated.csv",row.names=TRUE)
+write.csv(result, file = "KRW205_currency_result_table.csv",row.names=TRUE)
 
 
 
