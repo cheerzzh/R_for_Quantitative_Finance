@@ -163,5 +163,8 @@ for(i in 1 : nrow(potential_day))
 dev.off()
 
 
+# read in the indicator matirx 
+matrix <-  read.csv('KRW205_currency_indicator.csv',stringsAsFactors = FALSE)
 
-# use gridbase to combine plot
+
+
