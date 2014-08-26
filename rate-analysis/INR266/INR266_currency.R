@@ -1,7 +1,7 @@
 library(xts)
 library(xtsExtra)
 
-currency <- read.csv('INR266.csv',stringsAsFactors = FALSE)
+currency <- read.csv('INR266_currency.csv',stringsAsFactors = FALSE)
 index <- read.csv('NSERO_index.csv',stringsAsFactors = FALSE)
 
 # for currency first
