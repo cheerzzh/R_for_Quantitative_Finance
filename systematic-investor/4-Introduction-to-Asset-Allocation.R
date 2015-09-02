@@ -136,7 +136,7 @@ portopt <- function
  
     constraints = add.constraints(ia$expected.return, target[1], type = '=', constraints)
              
-    for(i in2:(nportfolios - 1) ) {
+    for(i in 2:(nportfolios - 1) ) {
         constraints$b[1] = target[i]
         out$weight[i, ] = match.fun(min.risk.fn)(ia, constraints)
     }
